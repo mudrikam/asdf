@@ -35,13 +35,46 @@
     if (!modalEl) return;
     var saveBtn = modalEl.querySelector('#save-settings-btn');
     if (!saveBtn) return;
+    var modelSelect = modalEl.querySelector('#model-select');
+
+    // Populate model select from JSON config if present
+    function populateModelSelect() {
+      if (!modelSelect) return Promise.resolve();
+      // avoid re-populating
+      if (modelSelect._populated) return Promise.resolve();
+      return fetch('configs/ai_configs.json', { cache: 'no-cache' }).then(function (r) {
+        if (!r.ok) return Promise.reject(new Error('Failed to load model config'));
+        return r.json();
+      }).then(function (cfg) {
+        // clear existing options except placeholder
+        var placeholder = modelSelect.querySelector('option[value=""]');
+        modelSelect.innerHTML = '';
+        if (placeholder) modelSelect.appendChild(placeholder);
+        var models = cfg && cfg.models ? cfg.models : {};
+        Object.keys(models).forEach(function (group) {
+          var optg = document.createElement('optgroup');
+          optg.label = group;
+          models[group].forEach(function (m) {
+            var opt = document.createElement('option');
+            opt.value = m;
+            opt.textContent = m;
+            optg.appendChild(opt);
+          });
+          modelSelect.appendChild(optg);
+        });
+        modelSelect._populated = true;
+      }).catch(function (err) { console.error('Failed to populate model select', err); });
+    }
 
     // In-memory entries while editing in the modal. Persist to IndexedDB on Save.
     var entries = [];
 
     // When modal is shown, load current entries from DB and render table
     modalEl.addEventListener('shown.bs.modal', function () {
-      listEntries().then(function (items) {
+      // ensure model list is populated then load entries
+      populateModelSelect().then(function () {
+        return listEntries();
+      }).then(function (items) {
         entries = items.slice();
         // store entries on modalEl for renderTable to pick up
         modalEl._entries = entries;
