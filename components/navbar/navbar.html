@@ -1,0 +1,42 @@
+<!-- Minimal navbar: only the site name/brand. Style provided by Bootstrap in the main page. -->
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+	<div class="container">
+		<a class="navbar-brand" href="#" id="site-name">DSNA Meta</a>
+		<!-- offcanvas toggle: shown on small screens in place of the default navbar-toggler -->
+		<button class="btn btn-outline-secondary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sideMenu" aria-controls="sideMenu" aria-label="Open menu">
+			<i class="fa-solid fa-bars"></i>
+		</button>
+
+			<div class="collapse navbar-collapse" id="mainNavbarCollapse">
+				<!-- Desktop nav: visible on lg and up. Hidden on mobile because mobile uses the offcanvas sidebar. -->
+				<ul class="navbar-nav me-auto mb-2 mb-lg-0 d-none d-lg-flex flex-row">
+					<li class="nav-item">
+						<a class="nav-link px-2" href="#">Docs</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link px-2" href="https://chat.whatsapp.com/CMQvDxpCfP647kBBA6dRn3" target="_blank" rel="noopener noreferrer">Join Whatsapp</a>
+					</li>
+				</ul>
+					<div class="d-flex align-items-center">
+						<!-- Desktop controls: visible on lg and up -->
+						<div class="d-none d-lg-flex align-items-center">
+							<div class="btn-group me-2">
+								<button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="themeDropdownBtn">
+									<i class="fa-solid fa-circle-half-stroke me-1"></i>Theme
+								</button>
+								<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="themeDropdownBtn">
+									<li><button class="dropdown-item" type="button" data-theme="light"><i class="fa-solid fa-sun me-2"></i>Light</button></li>
+									<li><button class="dropdown-item" type="button" data-theme="dark"><i class="fa-solid fa-moon me-2"></i>Dark</button></li>
+									<li><button class="dropdown-item" type="button" data-theme="auto"><i class="fa-solid fa-circle-half-stroke me-2"></i>Auto</button></li>
+								</ul>
+							</div>
+											<button id="open-settings" class="btn btn-outline-primary d-none d-lg-inline-flex align-items-center">
+												<i class="fa-solid fa-cog me-1"></i>
+												<span>Settings</span>
+											</button>
+						</div>
+					</div>
+		</div>
+	</div>
+</nav>
+
