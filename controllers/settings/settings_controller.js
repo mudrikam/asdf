@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var DIALOG_PATH = 'dialogs/settings_dialog.html';
+  var DIALOG_PATH = 'views/dialogs/settings_dialog.html';
 
   function ensureDialogLoaded() {
     return new Promise(function (resolve, reject) {
@@ -93,100 +93,13 @@
   }
 
   // IndexedDB helpers for storing API key entries (name, api, model)
-  var IDB_DBNAME = 'dsna-meta';
-  var IDB_STORE = 'apiKeys';
-
-  function openDb() {
-    return new Promise(function (resolve, reject) {
-      var req = indexedDB.open(IDB_DBNAME, 1);
-      req.onupgradeneeded = function (e) {
-        var db = e.target.result;
-        if (!db.objectStoreNames.contains(IDB_STORE)) {
-          var os = db.createObjectStore(IDB_STORE, { keyPath: 'id', autoIncrement: true });
-          os.createIndex('name', 'name', { unique: false });
-        }
-      };
-      req.onsuccess = function (e) { resolve(e.target.result); };
-      req.onerror = function (e) { reject(e.target.error); };
-    });
-  }
-
-  function addEntry(entry) {
-    return openDb().then(function (db) {
-      return new Promise(function (resolve, reject) {
-        var tx = db.transaction([IDB_STORE], 'readwrite');
-        var store = tx.objectStore(IDB_STORE);
-        var r = store.add(entry);
-        r.onsuccess = function (ev) { resolve(ev.target.result); };
-        r.onerror = function (ev) { reject(ev.target.error); };
-      });
-    });
-  }
-
-  function updateEntry(id, entry) {
-    return openDb().then(function (db) {
-      return new Promise(function (resolve, reject) {
-        var tx = db.transaction([IDB_STORE], 'readwrite');
-        var store = tx.objectStore(IDB_STORE);
-        var r = store.put(Object.assign({}, entry, { id: id }));
-        r.onsuccess = function (ev) { resolve(ev.target.result); };
-        r.onerror = function (ev) { reject(ev.target.error); };
-      });
-    });
-  }
-
-  function setActiveEntry(id) {
-    // Set the active flag only on the provided entry id and leave others untouched.
-    return openDb().then(function (db) {
-      return new Promise(function (resolve, reject) {
-        var tx = db.transaction([IDB_STORE], 'readwrite');
-        var store = tx.objectStore(IDB_STORE);
-        var getReq = store.get(id);
-        getReq.onsuccess = function (ev) {
-          var rec = ev.target.result;
-          if (!rec) return resolve();
-          rec.active = true;
-          var putReq = store.put(rec);
-          putReq.onsuccess = function () { resolve(); };
-          putReq.onerror = function (ev) { reject(ev.target.error); };
-        };
-        getReq.onerror = function (ev) { reject(ev.target.error); };
-      });
-    });
-  }
-
-  function listEntries() {
-    return openDb().then(function (db) {
-      return new Promise(function (resolve, reject) {
-        var tx = db.transaction([IDB_STORE], 'readonly');
-        var store = tx.objectStore(IDB_STORE);
-        var items = [];
-        var cur = store.openCursor();
-        cur.onsuccess = function (ev) {
-          var c = ev.target.result;
-          if (!c) {
-            resolve(items);
-            return;
-          }
-          items.push(c.value);
-          c.continue();
-        };
-        cur.onerror = function (ev) { reject(ev.target.error); };
-      });
-    });
-  }
-
-  function deleteEntry(id) {
-    return openDb().then(function (db) {
-      return new Promise(function (resolve, reject) {
-        var tx = db.transaction([IDB_STORE], 'readwrite');
-        var store = tx.objectStore(IDB_STORE);
-        var r = store.delete(id);
-        r.onsuccess = function () { resolve(); };
-        r.onerror = function (ev) { reject(ev.target.error); };
-      });
-    });
-  }
+  // Delegate IndexedDB operations to the model (model/api_keys_model.js)
+  function addEntry(entry) { return window.apiKeysModel.addEntry(entry); }
+  function updateEntry(id, entry) { return window.apiKeysModel.updateEntry(id, entry); }
+  function setActiveEntry(id) { return window.apiKeysModel.setActiveEntry(id); }
+  function listEntries() { return window.apiKeysModel.listEntries(); }
+  function deleteEntry(id) { return window.apiKeysModel.deleteEntry(id); }
+  function saveAllEntries(entries) { return window.apiKeysModel.saveAllEntries(entries); }
 
   function renderTable(modalEl) {
     var container = modalEl.querySelector('#apikeys-cards');

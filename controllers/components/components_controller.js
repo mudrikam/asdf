@@ -2,8 +2,8 @@
 (function () {
 	'use strict';
 
-	var NAV_PATH = 'components/navbar/navbar.html';
-	var SIDEBAR_PATH = 'components/sidebar/sidebar.html';
+	var NAV_PATH = 'views/components/navbar/navbar.html';
+	var SIDEBAR_PATH = 'views/components/sidebar/sidebar.html';
 
 	function loadFragment(path) {
 		return fetch(path, { cache: 'no-cache' }).then(function (resp) {
