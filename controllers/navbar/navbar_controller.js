@@ -13,6 +13,9 @@
     btn.innerHTML = iconHtml + text;
   }
 
+  // Expose for other controllers to keep the navbar label in sync
+  window.updateDropdownLabel = updateDropdownLabel;
+
   function initNavbarComponents() {
     // Initialize label from stored theme
     var initial = (function getStoredTheme() { try { return localStorage.getItem('dsna:theme') || 'auto'; } catch (e) { return 'auto'; } })();

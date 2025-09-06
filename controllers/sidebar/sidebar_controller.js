@@ -12,6 +12,8 @@
       var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
       root.setAttribute('data-bs-theme', prefersDark ? 'dark' : 'light');
     }
+  // Keep navbar dropdown label in sync if navbar controller exposed the helper
+  if (window.updateDropdownLabel) try { window.updateDropdownLabel(theme); } catch (e) { /* ignore */ }
   }
 
   function setStoredTheme(theme) {
@@ -37,8 +39,10 @@
       if (!t) return;
       // if clicked element or its ancestor has data-theme attribute
       var btn = t.closest && t.closest('[data-theme]');
-      if (btn && btn.dataset && btn.dataset.theme) {
-        var chosen = btn.dataset.theme;
+      if (btn) {
+        var chosen = (btn.dataset && btn.dataset.theme) || btn.getAttribute('data-theme');
+        if (!chosen) return;
+        console.debug('[dsna] theme button clicked:', chosen);
         setStoredTheme(chosen);
         applyTheme(chosen);
         updateDropdownActive(chosen);
@@ -64,6 +68,7 @@
     var initial = getStoredTheme();
     applyTheme(initial);
     updateDropdownActive(initial);
+  if (window.updateDropdownLabel) try { window.updateDropdownLabel(initial); } catch (e) { /* ignore */ }
   }
 
   window.initSidebarComponents = initSidebarComponents;
