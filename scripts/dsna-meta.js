@@ -2,35 +2,44 @@
 (function () {
 	'use strict';
 
-	// Simple script loader that appends scripts in order and returns a Promise
-	function loadScript(src) {
-		return new Promise(function (resolve, reject) {
-			var s = document.createElement('script');
-			s.src = src;
-			s.onload = resolve;
-			s.onerror = function (e) { reject(new Error('Failed to load ' + src)); };
-			document.head.appendChild(s);
+	// Fetch the HTML fragment that contains ordered <script> tags and
+	// inject it into the document so the browser executes them in order.
+	function fetchAndInjectScriptFragment(fragmentPath) {
+		return fetch(fragmentPath, { cache: 'no-cache' }).then(function (res) {
+			if (!res.ok) throw new Error('Failed to fetch ' + fragmentPath + ' (' + res.status + ')');
+			return res.text();
+		}).then(function (html) {
+			// Create a container to parse the fragment
+			var container = document.createElement('div');
+			container.innerHTML = html;
+
+			// Move each script node into the document head in order. Using
+			// DOM insertion ensures the scripts execute in sequence.
+			var scripts = container.querySelectorAll('script');
+			var promises = Array.prototype.map.call(scripts, function (s) {
+				return new Promise(function (resolve, reject) {
+					var ns = document.createElement('script');
+					if (s.src) ns.src = s.src;
+					if (s.type) ns.type = s.type;
+					// Preserve inline script content if any
+					if (!s.src) ns.text = s.textContent;
+					ns.onload = function () { resolve(s.src || 'inline'); };
+					ns.onerror = function () { reject(new Error('Failed to load script ' + (s.src || '<inline>'))); };
+					document.head.appendChild(ns);
+				});
+			});
+
+			// Return a promise that resolves when all scripts have loaded
+			return promises.reduce(function (p, cur) {
+				return p.then(function () { return cur; });
+			}, Promise.resolve());
 		});
 	}
 
-	// Load scripts in sequence
-	var scriptsToLoad = [
-		'scripts/navbar.js',
-		'scripts/sidebar.js',
-		'scripts/components.js',
-		'scripts/settings.js'
-	];
-
-	function loadAll() {
-		return scriptsToLoad.reduce(function (p, src) {
-			return p.then(function () { return loadScript(src); });
-		}, Promise.resolve());
-	}
-
-	loadAll().then(function () {
-		// All scripts loaded; components.js will inject HTML and call init hooks.
-		console.log('All UI scripts loaded');
+	var fragment = 'scripts/scripts.html';
+	fetchAndInjectScriptFragment(fragment).then(function () {
+		console.log('All UI scripts injected and executed');
 	}).catch(function (err) {
-		console.error('Failed loading UI scripts', err);
+		console.error('Failed injecting UI script fragment', err);
 	});
 })();
