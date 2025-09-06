@@ -22,9 +22,11 @@
 
   function updateDropdownActive(activeTheme) {
     ['light', 'dark', 'auto'].forEach(function (t) {
-      var el = document.querySelector('[data-theme="' + t + '"]');
-      if (!el) return;
-      if (t === activeTheme) el.classList.add('active'); else el.classList.remove('active');
+      var els = document.querySelectorAll('[data-theme="' + t + '"]');
+      if (!els) return;
+      els.forEach(function (el) {
+        if (t === activeTheme) el.classList.add('active'); else el.classList.remove('active');
+      });
     });
   }
 
