@@ -202,8 +202,8 @@
                        '<td>' + escapeHtml(maskApi(it.api || '')) + '</td>' +
                        '<td>' + escapeHtml(it.model || '') + '</td>' +
                        '<td class="text-end">'
-                         + '<button class="btn btn-sm btn-outline-primary btn-edit me-1" data-id="' + it.id + '" title="Edit"><i class="fas fa-edit"></i></button>'
-                         + '<button class="btn btn-sm btn-danger btn-delete" data-id="' + it.id + '" title="Delete"><i class="fas fa-trash-alt"></i></button>'
+                         + '<button type="button" class="btn btn-sm btn-outline-primary btn-edit me-1" data-id="' + it.id + '" title="Edit"><i class="fas fa-edit"></i></button>'
+                         + '<button type="button" class="btn btn-sm btn-danger btn-delete" data-id="' + it.id + '" title="Delete"><i class="fas fa-trash-alt"></i></button>'
                        + '</td>';
         tbody.appendChild(tr);
       });
@@ -263,6 +263,11 @@
 
     // Delegate actions: delete, edit, set-active
     tbody.addEventListener('click', function (ev) {
+      // Prevent implicit form submission on mobile when buttons inside a form are clicked
+      if (ev && ev.target) {
+        var possibleBtn = ev.target.closest && ev.target.closest('button');
+        if (possibleBtn) ev.preventDefault();
+      }
       var del = ev.target.closest && ev.target.closest('.btn-delete');
       if (del) {
         var id = Number(del.getAttribute('data-id'));
