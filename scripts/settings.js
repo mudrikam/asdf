@@ -189,23 +189,30 @@
   }
 
   function renderTable(modalEl) {
-    var tbody = modalEl.querySelector('#apikeys-table-body');
-    if (!tbody) return;
+    var container = modalEl.querySelector('#apikeys-cards');
+    if (!container) return;
     // Always read current entries from IndexedDB to ensure persistence across reloads
     listEntries().then(function (items) {
-      tbody.innerHTML = '';
+      container.innerHTML = '';
       items.forEach(function (it) {
-        var tr = document.createElement('tr');
-        var activeHtml = (it.active) ? '<i class="fas fa-check-circle text-success"></i>' : '';
-        tr.innerHTML = '<td>' + activeHtml + '</td>' +
-                       '<td>' + escapeHtml(it.name || '') + '</td>' +
-                       '<td>' + escapeHtml(maskApi(it.api || '')) + '</td>' +
-                       '<td>' + escapeHtml(it.model || '') + '</td>' +
-                       '<td class="text-end">'
-                         + '<button type="button" class="btn btn-sm btn-outline-primary btn-edit me-1" data-id="' + it.id + '" title="Edit"><i class="fas fa-edit"></i></button>'
-                         + '<button type="button" class="btn btn-sm btn-danger btn-delete" data-id="' + it.id + '" title="Delete"><i class="fas fa-trash-alt"></i></button>'
-                       + '</td>';
-        tbody.appendChild(tr);
+        var col = document.createElement('div');
+        col.className = 'col-12 col-sm-6 col-md-4';
+        var activeBadge = (it.active) ? '<span class="badge bg-success me-1" title="Active"><i class="fas fa-check-circle"></i></span>' : '';
+        var cardHtml = '<div class="card shadow-sm">'
+          + '<div class="card-body p-2">'
+            + '<div class="d-flex align-items-start justify-content-between mb-1">'
+              + '<div>' + activeBadge + '<strong>' + escapeHtml(it.name || '') + '</strong></div>'
+              + '<div class="text-end">'
+                + '<button type="button" class="btn btn-sm btn-outline-primary btn-edit me-1" data-id="' + it.id + '" title="Edit"><i class="fas fa-edit"></i></button>'
+                + '<button type="button" class="btn btn-sm btn-danger btn-delete" data-id="' + it.id + '" title="Delete"><i class="fas fa-trash-alt"></i></button>'
+              + '</div>'
+            + '</div>'
+            + '<div class="small text-muted mb-1">' + escapeHtml(maskApi(it.api || '')) + '</div>'
+            + '<div class="small text-secondary">' + escapeHtml(it.model || '') + '</div>'
+          + '</div>'
+        + '</div>';
+        col.innerHTML = cardHtml;
+        container.appendChild(col);
       });
     }).catch(function (err) { console.error('Failed to list entries', err); });
   }
@@ -232,8 +239,8 @@
     var nameInput = modalEl.querySelector('#apikey-name');
     var apiInput = modalEl.querySelector('#apikey-input');
     var modelSelect = modalEl.querySelector('#model-select');
-    var tbody = modalEl.querySelector('#apikeys-table-body');
-    if (!addBtn || !nameInput || !apiInput || !modelSelect || !tbody) return;
+  var cardsContainer = modalEl.querySelector('#apikeys-cards');
+  if (!addBtn || !nameInput || !apiInput || !modelSelect || !cardsContainer) return;
 
     var addClick = function () {
       var name = (nameInput.value || '').trim();
@@ -262,8 +269,8 @@
     addBtn.addEventListener('click', addClick);
 
     // Delegate actions: delete, edit, set-active
-    tbody.addEventListener('click', function (ev) {
-      // Prevent implicit form submission on mobile when buttons inside a form are clicked
+    cardsContainer.addEventListener('click', function (ev) {
+      // Prevent implicit form submission on mobile when buttons inside the card are clicked
       if (ev && ev.target) {
         var possibleBtn = ev.target.closest && ev.target.closest('button');
         if (possibleBtn) ev.preventDefault();
@@ -287,7 +294,7 @@
         bs.show();
         return;
       }
-      var edit = ev.target.closest && ev.target.closest('.btn-edit');
+  var edit = ev.target.closest && ev.target.closest('.btn-edit');
       if (edit) {
         var id = Number(edit.getAttribute('data-id'));
         if (!id) return;
@@ -349,7 +356,7 @@
         });
         return;
       }
-      var sa = ev.target.closest && ev.target.closest('.btn-set-active');
+  var sa = ev.target.closest && ev.target.closest('.btn-set-active');
       if (sa) {
         var id = Number(sa.getAttribute('data-id'));
         if (!id) return;
